@@ -23,6 +23,8 @@ Things you may want to cover:
 
 * ...
 
+https://devise-token-auth.gitbook.io/devise-token-auth/usage/overrides
+
 rails new portfolio_api --api -T --database=postgresql
 
 psql -U postgres
@@ -74,3 +76,15 @@ rake db:setup
 rails generate devise:install
 rails g devise_token_auth:install User auth
 rails db:migrate
+
+application_controller.rb
+class ApplicationController < ActionController::API
+        include ActionController::RequestForgeryProtection
+        include DeviseTokenAuth::Concerns::SetUserByToken
+
+  protect_from_forgery unless: -> { request.format.json? }
+end
+
+
+application.rb
+config.middleware.use ActionDispatch::Flash

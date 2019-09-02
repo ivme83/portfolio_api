@@ -10,10 +10,80 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_09_02_004025) do
+ActiveRecord::Schema.define(version: 2019_09_02_224944) do
 
   # These are extensions that must be enabled in order to support this database
+  enable_extension "hstore"
   enable_extension "plpgsql"
+
+  create_table "accepted_slas", force: :cascade do |t|
+    t.bigint "merchants_id"
+    t.bigint "sla_versions_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["merchants_id"], name: "index_accepted_slas_on_merchants_id"
+    t.index ["sla_versions_id"], name: "index_accepted_slas_on_sla_versions_id"
+  end
+
+  create_table "active_storage_attachments", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "record_type", null: false
+    t.bigint "record_id", null: false
+    t.bigint "blob_id", null: false
+    t.datetime "created_at", null: false
+    t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
+    t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
+  end
+
+  create_table "active_storage_blobs", force: :cascade do |t|
+    t.string "key", null: false
+    t.string "filename", null: false
+    t.string "content_type"
+    t.text "metadata"
+    t.bigint "byte_size", null: false
+    t.string "checksum", null: false
+    t.datetime "created_at", null: false
+    t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
+  end
+
+  create_table "emails", force: :cascade do |t|
+    t.string "email_from"
+    t.string "email_to"
+    t.string "email_subject"
+    t.text "email_content"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id"
+    t.index ["user_id"], name: "index_emails_on_user_id"
+  end
+
+  create_table "merchants", force: :cascade do |t|
+    t.string "name"
+    t.string "email"
+    t.string "phone"
+    t.string "website"
+    t.string "merchant_id"
+    t.string "merchant_id_test"
+    t.string "platform"
+    t.string "portal_status"
+    t.string "surchx_status"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "test_token_arr", default: [], array: true
+    t.string "prod_token_arr", default: [], array: true
+    t.hstore "mailing_address"
+    t.hstore "processors"
+    t.bigint "accepted_sla_id"
+    t.index ["accepted_sla_id"], name: "index_merchants_on_accepted_sla_id"
+  end
+
+  create_table "sla_versions", force: :cascade do |t|
+    t.string "version"
+    t.text "text"
+    t.string "url"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
 
   create_table "users", force: :cascade do |t|
     t.string "provider", default: "email", null: false
@@ -27,17 +97,30 @@ ActiveRecord::Schema.define(version: 2019_09_02_004025) do
     t.datetime "confirmed_at"
     t.datetime "confirmation_sent_at"
     t.string "unconfirmed_email"
-    t.string "name"
+    t.string "first_name"
     t.string "nickname"
     t.string "image"
     t.string "email"
     t.json "tokens"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "sign_in_count", default: 0, null: false
+    t.datetime "current_sign_in_at"
+    t.datetime "last_sign_in_at"
+    t.string "current_sign_in_ip"
+    t.string "last_sign_in_ip"
+    t.string "role"
+    t.string "last_name"
+    t.bigint "merchant_id"
     t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["merchant_id"], name: "index_users_on_merchant_id"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["uid", "provider"], name: "index_users_on_uid_and_provider", unique: true
   end
 
+  add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "emails", "users"
+  add_foreign_key "merchants", "accepted_slas"
+  add_foreign_key "users", "merchants"
 end
