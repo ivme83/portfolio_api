@@ -1,4 +1,9 @@
-# frozen_string_literal: true
+module ROLES
+  SUPERADMIN = 'superadmin'
+  ADMIN = 'admin'
+  SUPERVISOR = 'supervisor'
+  USER = 'user'
+end
 
 class User < ActiveRecord::Base
   ROLES = %i[superadmin admin supervisor user]
